@@ -49,7 +49,7 @@ void showInstruction(
     oled.display();
 }
 
-// 
+// ミニゲーム成功画面
 void showSuccess()
 {
     oled.clearDisplay();
@@ -62,6 +62,7 @@ void showSuccess()
     oled.display();
 }
 
+// ミニゲーム失敗画面
 void showFailed()
 {
     oled.clearDisplay();
@@ -70,6 +71,34 @@ void showFailed()
     oled.setCursor(10,20);
 
     oled.println("MISS");
+
+    oled.display();
+}
+
+// ジョイスティック位置表示
+void showJoystickInfo(
+    int targetAngle,
+    int currentAngle)
+{
+    oled.clearDisplay();
+
+    oled.setTextColor(WHITE);
+
+    oled.setTextSize(1);
+
+    oled.setCursor(0, 0);
+    oled.print("TARGET");
+
+    oled.setCursor(0, 10);
+    oled.print(targetAngle);
+    oled.print(" DEG");
+
+    oled.setCursor(0, 35);
+    oled.print("NOW");
+
+    oled.setCursor(0, 45);
+    oled.print(currentAngle);
+    oled.print(" DEG");
 
     oled.display();
 }

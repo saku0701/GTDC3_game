@@ -30,6 +30,10 @@ void setup(){
 
 void loop(){
     updateMiniGame();
+    if(getCurrentGame() == GAME_JOYSTICK_DOWN){
+        showJoystickInfo(getTargetAngle(), getCurrentAngle());
+    }
+
 
     //ミニゲーム成功
     if(isMiniGameSuccess()){

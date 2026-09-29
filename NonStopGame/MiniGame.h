@@ -38,6 +38,11 @@ bool isMiniGameFailed(void);
 // 時間制限
 bool isTimeUp(void);
 
+// 角度
+int getTargetAngle(void);
+int getCurrentAngle(void);
+MiniGameType getCurrentGame(void);
+
 // ミニゲーム指示表示
 const char* getInstruction(void);
 

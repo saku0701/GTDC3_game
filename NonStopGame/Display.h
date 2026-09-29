@@ -14,4 +14,7 @@ void showSuccess();
 // ミニゲーム失敗画面
 void showFailed();
 
+// ジョイスティック表示
+void showJoystickInfo(int targetAngle, int currentAngle);
+
 #endif

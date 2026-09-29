@@ -13,6 +13,9 @@ static bool timeUpFlag;
 
 static unsigned long timeLimit;
 
+// ジョイスティック不感帯 
+#define JOYSTICK_DEADZONE 510
+
 // 長押し対策
 static bool prevLeftPressed = false;
 static bool prevCenterPressed = false;
@@ -29,6 +32,7 @@ static int targetOrder[4];
 // JOYSTICK_DOWNゲーム用
 static int targetAngle;
 static int angleTolerance;
+static bool joystickJudged;
 
 // ゲーム指示
 static char instruction[32];
@@ -51,17 +55,29 @@ float getJoystickAngle(){
     int y = analogRead(A1);
 
     float dx = (float)x - 512.0;
-    float dy = (float)y - 512.0;
+    float dy = 512.0 - (float)y;
 
-    float angle =
-        atan2(dy, dx) * 180.0 / PI;
+    float angle = atan2(dy, dx) * 180.0 / PI;
 
-    if(angle < 0)
-    {
+    if(angle < 0){
         angle += 360.0;
     }
 
     return angle;
+}
+
+// 傾き量判定関数
+bool isJoystickTilted(){
+    int x = analogRead(A0);
+    int y = analogRead(A1);
+
+    float dx = (float)x - 512.0;
+    float dy = (float)y - 512.0;
+
+    float distance =
+        sqrt(dx * dx + dy * dy);
+
+    return distance > JOYSTICK_DEADZONE;
 }
 
 // 角度判定関数
@@ -223,6 +239,7 @@ void startMiniGame(MiniGameType gameType, Difficulty difficulty){
     successFlag = false;
     failedFlag = false;
     timeUpFlag = false;
+    joystickJudged = false;
 
     // ゲーム開始時間取得
     startTime = millis();
@@ -343,7 +360,16 @@ void updateMiniGame(){
         }
 
         case GAME_JOYSTICK_DOWN://ジョイスティック倒しゲーム
-            // これはデバッグ用表示
+            if(joystickJudged){
+                break;
+            }
+
+            // 不感帯内は無視
+            if(!isJoystickTilted()){
+                break;
+            }
+
+            // デバッグ用表示
             Serial.print("Target=");
             Serial.print(targetAngle);
             Serial.print(" Current=");
@@ -351,7 +377,18 @@ void updateMiniGame(){
 
             if(isAngleMatch(currentAngle, targetAngle, angleTolerance)){
                 successFlag = true;
+
+                Serial.println("Correct");
             }
+            else{
+                failedFlag = true;
+
+                Serial.println("Wrong");
+            }
+
+            joystickJudged = true;
+
+            break;
     }
 }
 
@@ -365,6 +402,19 @@ bool isMiniGameFailed(){
 
 const char* getInstruction(){
     return instruction;
+}
+
+int getTargetAngle()
+{
+    return targetAngle;
+}
+
+int getCurrentAngle(){
+    return (int)getJoystickAngle();
+}
+
+MiniGameType getCurrentGame(){
+return currentGame;
 }
 
 bool isTimeUp(){
