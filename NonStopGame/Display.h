@@ -17,4 +17,10 @@ void showFailed();
 // ジョイスティック表示
 void showJoystickInfo(int targetAngle, int currentAngle);
 
+// 測距表示
+void showDistanceInfo(int targetDistance, int currentDistance);
+
+// ジョイスティック回転表示
+void showRotateInfo(int targetCount, int completedCount, int percent);
+
 #endif

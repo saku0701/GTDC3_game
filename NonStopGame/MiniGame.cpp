@@ -16,6 +16,14 @@ static unsigned long timeLimit;
 // ジョイスティック不感帯 
 #define JOYSTICK_DEADZONE 510
 
+// 測距センサ
+#define TRIG_PIN 9
+#define ECHO_PIN 8
+#define DISTANCE_TOLERANCE 3
+#define EASY_HOLD_TIME    1000
+#define NORMAL_HOLD_TIME  2000
+#define HARD_HOLD_TIME    3000
+
 // 長押し対策
 static bool prevLeftPressed = false;
 static bool prevCenterPressed = false;
@@ -33,6 +41,23 @@ static int targetOrder[4];
 static int targetAngle;
 static int angleTolerance;
 static bool joystickJudged;
+
+// DISTANCEゲーム用
+static int targetDistance;
+static int distanceTolerance;
+static unsigned long requiredHoldTime;
+static unsigned long accumulatedHoldTime;
+static unsigned long lastUpdateTime;
+static float currentDistanceCm;
+
+// JOYSTICK_ROTATEゲーム用
+static int targetRotateCount;
+static int completedRotateCount;
+static float currentRotateProgress;
+static bool rotateInit;
+static float lastRotateAngle;
+static float accumulatedRotateAngle;
+
 
 // ゲーム指示
 static char instruction[32];
@@ -90,6 +115,23 @@ bool isAngleMatch(float actual, float target, float tolerance){
     }
 
     return (diff <= tolerance);
+}
+
+// 距離取得関数
+float getDistanceCm(){
+    digitalWrite(TRIG_PIN, LOW);
+    delayMicroseconds(2);
+
+    digitalWrite(TRIG_PIN, HIGH);
+    delayMicroseconds(10);
+
+    digitalWrite(TRIG_PIN, LOW);
+
+    long duration = pulseIn(ECHO_PIN, HIGH, 30000);
+
+    float distance = duration / 58.00;  // Formula: (340m/s * 1us) / 2
+
+    return distance;
 }
 
 // PUSHゲーム
@@ -230,6 +272,61 @@ void createJoystickDownInstruction(){
     sprintf(instruction, "%03d DEG", targetAngle);
 }
 
+// Distanceゲーム
+void createDistanceInstruction(){
+    targetDistance = random(10, 40);
+
+    distanceTolerance = DISTANCE_TOLERANCE;
+
+    accumulatedHoldTime = 0;
+
+    lastUpdateTime = millis();
+
+    switch(currentDifficulty){
+        case EASY:
+            requiredHoldTime = EASY_HOLD_TIME;
+            break;
+
+        case NORMAL:
+            requiredHoldTime = NORMAL_HOLD_TIME;
+            break;
+
+        case HARD:
+            requiredHoldTime = HARD_HOLD_TIME;
+            break;
+    }
+
+    sprintf(instruction, "%d cm", targetDistance);
+}
+
+// JOYSTICK＿ROTATEゲーム
+void createJoystickRotateInstruction()
+{
+    rotateInit = false;
+
+    completedRotateCount = 0;
+
+    accumulatedRotateAngle = 0.0;
+
+    currentRotateProgress = 0.0;
+
+    switch(currentDifficulty){
+        case EASY:
+            targetRotateCount = 3;
+            break;
+
+        case NORMAL:
+            targetRotateCount = 5;
+            break;
+
+        case HARD:
+            targetRotateCount = 10;
+            break;
+    }
+
+    sprintf(instruction, "ROTATE %d", targetRotateCount);
+}
+
 // ミニゲーム実行
 void startMiniGame(MiniGameType gameType, Difficulty difficulty){
     currentGame = gameType;
@@ -271,9 +368,16 @@ void startMiniGame(MiniGameType gameType, Difficulty difficulty){
         case GAME_JOYSTICK_DOWN:
             createJoystickDownInstruction();
             break;
+
+        case GAME_DISTANCE_KEEP:
+            createDistanceInstruction();
+            break;
+
+        case GAME_JOYSTICK_ROTATE:
+            createJoystickRotateInstruction();
+            break;
     }
 }
-
 
 // 入力状態
 void updateMiniGame(){
@@ -389,6 +493,80 @@ void updateMiniGame(){
             joystickJudged = true;
 
             break;
+
+        case GAME_DISTANCE_KEEP:{//距離保持ゲーム
+                currentDistanceCm = getDistanceCm();
+
+                float currentDistance = currentDistanceCm;
+
+                unsigned long now = millis();
+
+                if(
+                    currentDistance >= targetDistance - distanceTolerance
+                    &&
+                    currentDistance <= targetDistance + distanceTolerance
+                ){
+                    accumulatedHoldTime += (now - lastUpdateTime);
+                }
+
+                lastUpdateTime = now;
+
+                if(accumulatedHoldTime >= requiredHoldTime){
+                    successFlag = true;
+                }
+
+                break;
+            }
+
+            case GAME_JOYSTICK_ROTATE:{//ジョイスティック回転ゲーム
+                if(!isJoystickTilted()){
+                    break;
+                }
+
+                float currentAngle = getJoystickAngle();
+
+                if(!rotateInit){
+                    lastRotateAngle = currentAngle;
+
+                    rotateInit = true;
+
+                    break;
+                }
+
+                float delta = currentAngle - lastRotateAngle;
+
+                if(delta > 180){
+                    delta -= 360;
+                }
+
+                if(delta < -180){
+                    delta += 360;
+                }
+
+                lastRotateAngle = currentAngle;
+
+                // 時計回りのみ加算
+                if(delta < 0){
+                    accumulatedRotateAngle += -delta;
+
+                    currentRotateProgress = accumulatedRotateAngle;
+                }
+
+                if(accumulatedRotateAngle >= 360.0){
+                    accumulatedRotateAngle -= 360.0;
+
+                    completedRotateCount++;
+
+                    Serial.print("Rotate=");
+                    Serial.println(completedRotateCount);
+                }
+
+                if(completedRotateCount >= targetRotateCount){
+                    successFlag = true;
+                }
+
+                break;
+            }
     }
 }
 
@@ -404,14 +582,42 @@ const char* getInstruction(){
     return instruction;
 }
 
-int getTargetAngle()
-{
+// 角度
+int getTargetAngle(){
     return targetAngle;
 }
 
 int getCurrentAngle(){
     return (int)getJoystickAngle();
 }
+
+// 測距
+int getTargetDistance(){
+    return targetDistance;
+}
+
+int getCurrentDistance(){
+
+    Serial.print("Distance=");
+    Serial.println(currentDistanceCm);
+
+    return (int)currentDistanceCm;
+}
+
+// ジョイスティック回転
+int getTargetRotateCount(){
+    return targetRotateCount;
+}
+
+int getCompletedRotateCount(){
+    return completedRotateCount;
+}
+
+int getCurrentRotatePercent(){
+    return (int)(accumulatedRotateAngle * 100.0 / 360.0);
+}
+
+
 
 MiniGameType getCurrentGame(){
 return currentGame;

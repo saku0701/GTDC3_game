@@ -102,3 +102,50 @@ void showJoystickInfo(
 
     oled.display();
 }
+
+// 測距表示
+void showDistanceInfo(int targetDistance, int currentDistance)
+{
+    oled.clearDisplay();
+
+    oled.setTextColor(WHITE);
+    oled.setTextSize(1);
+
+    oled.setCursor(0, 0);
+    oled.print("TARGET");
+
+    oled.setCursor(0, 12);
+    oled.print(targetDistance);
+    oled.print(" cm");
+
+    oled.setCursor(0, 36);
+    oled.print("CURRENT");
+
+    oled.setCursor(0, 48);
+    oled.print(currentDistance);
+    oled.print(" cm");
+
+    oled.display();
+}
+
+// ジョイスティック回転表示
+void showRotateInfo(int targetCount, int completedCount, int percent){
+    oled.clearDisplay();
+
+    oled.setTextSize(1);
+
+    oled.setCursor(0,0);
+    oled.print("TARGET:");
+    oled.println(targetCount);
+
+    oled.setCursor(0,20);
+    oled.print("DONE:");
+    oled.println(completedCount);
+
+    oled.setCursor(0,40);
+    oled.print("PROGRESS:");
+    oled.print(percent);
+    oled.println("%");
+
+    oled.display();
+}

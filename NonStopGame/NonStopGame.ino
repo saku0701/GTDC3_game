@@ -10,28 +10,40 @@ void setup(){
     pinMode(3, INPUT_PULLUP);
     pinMode(4, INPUT_PULLUP);
 
+    // HC-SR04設定
+    pinMode(9, OUTPUT);  // TRIG
+    pinMode(8, INPUT);   // ECHO
+
     // 乱数ソース
     randomSeed(micros());
 
 
     initDisplay();
 
-    startMiniGame(
-        selectMiniGame(),
-        NORMAL);
+    startMiniGame( selectMiniGame(), NORMAL);
 
-    showInstruction(
-        getInstruction());
+    showInstruction(getInstruction());
 
-    Serial.println(
-        getInstruction());
+    Serial.println(getInstruction());
 
 }
 
 void loop(){
     updateMiniGame();
+    
+    // ジョイスティックゲームの時
     if(getCurrentGame() == GAME_JOYSTICK_DOWN){
         showJoystickInfo(getTargetAngle(), getCurrentAngle());
+    }
+
+    // 測距ゲームの時
+    if(getCurrentGame() == GAME_DISTANCE_KEEP){
+        showDistanceInfo(getTargetDistance(), getCurrentDistance());
+    }
+
+    // ジョイスティック回転ゲームの時
+    if(getCurrentGame() == GAME_JOYSTICK_ROTATE){
+        showRotateInfo( getTargetRotateCount(), getCompletedRotateCount(), getCurrentRotatePercent());
     }
 
 
@@ -58,5 +70,5 @@ void loop(){
         while(true);
     }
 
-    delay(100);
+    delay(10);
 }

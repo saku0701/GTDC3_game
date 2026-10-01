@@ -18,7 +18,9 @@ enum Difficulty
 enum MiniGameType{
     GAME_PUSH,
     GAME_PUSH_INORDER,
-    GAME_JOYSTICK_DOWN
+    GAME_JOYSTICK_DOWN,
+    GAME_DISTANCE_KEEP,
+    GAME_JOYSTICK_ROTATE
 };
 
 // ミニゲーム開始
@@ -42,6 +44,15 @@ bool isTimeUp(void);
 int getTargetAngle(void);
 int getCurrentAngle(void);
 MiniGameType getCurrentGame(void);
+
+// 測距
+int getTargetDistance(void);
+int getCurrentDistance(void);
+
+// ジョイスティック回転
+int getTargetRotateCount(void);
+int getCompletedRotateCount(void);
+int getCurrentRotatePercent(void);
 
 // ミニゲーム指示表示
 const char* getInstruction(void);
