@@ -3,6 +3,6 @@
 
 // ミニゲーム抽選
 MiniGameType selectMiniGame(void){
-  // return (MiniGameType)random(0, 5);
-  return (MiniGameType)0;
+  return (MiniGameType)random(0, 5);
+  // return (MiniGameType)2;
 }

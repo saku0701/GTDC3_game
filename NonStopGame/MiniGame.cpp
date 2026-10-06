@@ -22,7 +22,7 @@ static unsigned long timeLimit;
 #define DISTANCE_TOLERANCE 3
 #define EASY_HOLD_TIME    1000
 #define NORMAL_HOLD_TIME  2000
-#define HARD_HOLD_TIME    3000
+#define HARD_HOLD_TIME    2500
 
 // 長押し対策
 static bool prevLeftPressed = false;
@@ -67,7 +67,15 @@ static char instruction[32];
 #define NORMAL_TIME_LIMIT (7 * 1000)
 #define HARD_TIME_LIMIT (3 * 1000)
 
+// 残り時間表示
+unsigned long getElapsedTime(){
+    return millis() - startTime;
+}
+unsigned long getTimeLimit(){
+    return timeLimit;
+}
 
+// ボタン
 enum ButtonType{
     BUTTON_LEFT,
     BUTTON_CENTER,
@@ -265,7 +273,7 @@ void createJoystickDownInstruction(){
             break;
 
         case HARD:
-            angleTolerance = 10;
+            angleTolerance = 15;
             break;
     }
 
@@ -300,8 +308,7 @@ void createDistanceInstruction(){
 }
 
 // JOYSTICK＿ROTATEゲーム
-void createJoystickRotateInstruction()
-{
+void createJoystickRotateInstruction(){
     rotateInit = false;
 
     completedRotateCount = 0;
@@ -320,7 +327,7 @@ void createJoystickRotateInstruction()
             break;
 
         case HARD:
-            targetRotateCount = 10;
+            targetRotateCount = 5;
             break;
     }
 

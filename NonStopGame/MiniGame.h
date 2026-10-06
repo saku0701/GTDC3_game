@@ -57,4 +57,8 @@ int getCurrentRotatePercent(void);
 // ミニゲーム指示表示
 const char* getInstruction(void);
 
+// 残り時間表示
+unsigned long getElapsedTime();
+unsigned long getTimeLimit();
+
 #endif

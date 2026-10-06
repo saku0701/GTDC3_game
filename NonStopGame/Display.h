@@ -1,3 +1,4 @@
+#include "MiniGame.h"
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
@@ -22,5 +23,20 @@ void showDistanceInfo(int targetDistance, int currentDistance);
 
 // ジョイスティック回転表示
 void showRotateInfo(int targetCount, int completedCount, int percent);
+
+// メニュー表示
+void showMenuScreen(Difficulty difficulty);
+
+// カウントダウン表示
+void showCountdown(int count);
+
+// ゲームクリア表示
+void showGameClear();
+
+// ゲームステータス表示
+void showGameStatus(int currentGame, int totalGame, unsigned long elapsed, unsigned long limit);
+
+// ゲームステータス表示のリセット
+void resetGameStatusDisplay();
 
 #endif
