@@ -27,7 +27,9 @@ enum MiniGameType{
     GAME_PUSH_INORDER,
     GAME_JOYSTICK_DOWN,
     GAME_DISTANCE_KEEP,
-    GAME_JOYSTICK_ROTATE
+    GAME_JOYSTICK_ROTATE,
+    
+    GAME_TYPE_COUNT//実装ゲーム数カウント
 };
 
 // ミニゲーム開始

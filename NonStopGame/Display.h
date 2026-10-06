@@ -2,12 +2,12 @@
 #ifndef DISPLAY_H
 #define DISPLAY_H
 
-// ディスプレイ初期化
-void initDisplay();
+// OLEDとLCDを初期化
+// 成功時はtrue、失敗時はfalseを返す
+bool initDisplay(void);
 
 // ミニゲーム指示表示
-void showInstruction(
-    const char* text);
+void showInstruction(const char* text);
 
 // ミニゲーム成功画面表示
 void showSuccess();

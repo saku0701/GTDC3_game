@@ -16,16 +16,64 @@ static bool timeUpFlag;
 
 static unsigned long timeLimit;
 
+// ボタン入力ピン
+#define BUTTON_LEFT_PIN       2
+#define BUTTON_CENTER_PIN     3
+#define BUTTON_RIGHT_PIN      4
+#define PUSH_ORDER_MAX_COUNT 4
+
+// ボタン順押し
+#define PUSH_ORDER_EASY_COUNT 2
+#define PUSH_ORDER_NORMAL_COUNT 3
+#define PUSH_ORDER_HARD_COUNT 4
+
+// ジョイスティック
+#define JOYSTICK_X_PIN A0
+#define JOYSTICK_Y_PIN A1
+#define JOYSTICK_CENTER_X 512.0f
+#define JOYSTICK_CENTER_Y 512.0f
+
 // ジョイスティック不感帯 
 #define JOYSTICK_DEADZONE 510
+
+// ジョイスティック回転角
+#define FULL_CIRCLE_DEGREES 360.0f
+#define HALF_CIRCLE_DEGREES 180.0f
+
+// ジョイスティック角度範囲指定
+#define TARGET_ANGLE_STEP 10
+#define TARGET_ANGLE_COUNT 36
+
+// ジョイスティック難易度ごとの角度許容範囲
+#define EASY_ANGLE_TOLERANCE 45
+#define NORMAL_ANGLE_TOLERANCE 25
+#define HARD_ANGLE_TOLERANCE 10
+
+// ジョイスティック難易度ごとの回転数
+#define EASY_ROTATE_COUNT 3
+#define NORMAL_ROTATE_COUNT 5
+#define HARD_ROTATE_COUNT 7
+
+// 回転最大割合(100.0%)
+#define ROTATE_PERCENT_MAX 100.0f
 
 // 測距センサ
 #define TRIG_PIN 9
 #define ECHO_PIN 8
-#define DISTANCE_TOLERANCE 3
+
+// 測距パラメータ
+#define DISTANCE_TOLERANCE_CM 3
+#define DISTANCE_TARGET_MIN_CM 10
+#define DISTANCE_TARGET_MAX_CM 40
+
+// 測距ゲーム保持時間
 #define EASY_HOLD_TIME    1000
 #define NORMAL_HOLD_TIME  2000
 #define HARD_HOLD_TIME    2500
+
+// 測距計測パラメータ
+#define DISTANCE_ECHO_TIMEOUT_US 30000UL
+#define DISTANCE_CONVERSION_VALUE 58.0f
 
 // 長押し対策
 static bool prevLeftPressed = false;
@@ -38,7 +86,7 @@ static int targetButton;
 // PUSH＿INODERゲームのボタン順抽選
 static int currentIndex;
 static int targetCount;
-static int targetOrder[4];
+static int targetOrder[PUSH_ORDER_MAX_COUNT];
 
 // JOYSTICK_DOWNゲーム用
 static int targetAngle;
@@ -87,16 +135,16 @@ enum ButtonType{
 
 // 角度取得関数
 float getJoystickAngle(){
-    int x = analogRead(A0);
-    int y = analogRead(A1);
+    int x = analogRead(JOYSTICK_X_PIN);
+    int y = analogRead(JOYSTICK_Y_PIN);
 
-    float dx = (float)x - 512.0;
-    float dy = 512.0 - (float)y;
+    float dx = (float)x - JOYSTICK_CENTER_X;
+    float dy = JOYSTICK_CENTER_Y - (float)y;
 
-    float angle = atan2(dy, dx) * 180.0 / PI;
+    float angle = atan2(dy, dx) * HALF_CIRCLE_DEGREES / PI;
 
     if(angle < 0){
-        angle += 360.0;
+        angle += FULL_CIRCLE_DEGREES;
     }
 
     return angle;
@@ -104,14 +152,13 @@ float getJoystickAngle(){
 
 // 傾き量判定関数
 bool isJoystickTilted(){
-    int x = analogRead(A0);
-    int y = analogRead(A1);
+    int x = analogRead(JOYSTICK_X_PIN);
+    int y = analogRead(JOYSTICK_Y_PIN);
 
-    float dx = (float)x - 512.0;
-    float dy = (float)y - 512.0;
+    float dx = (float)x - JOYSTICK_CENTER_X;
+    float dy = (float)y - JOYSTICK_CENTER_Y;
 
-    float distance =
-        sqrt(dx * dx + dy * dy);
+    float distance = sqrt(dx * dx + dy * dy);
 
     return distance > JOYSTICK_DEADZONE;
 }
@@ -121,8 +168,8 @@ bool isAngleMatch(float actual, float target, float tolerance){
     float diff =
         fabs(actual - target);
 
-    if(diff > 180){
-        diff = 360 - diff;
+    if(diff > HALF_CIRCLE_DEGREES){
+        diff = FULL_CIRCLE_DEGREES - diff;
     }
 
     return (diff <= tolerance);
@@ -138,9 +185,9 @@ float getDistanceCm(){
 
     digitalWrite(TRIG_PIN, LOW);
 
-    long duration = pulseIn(ECHO_PIN, HIGH, 30000);
+    long duration = pulseIn(ECHO_PIN, HIGH, DISTANCE_ECHO_TIMEOUT_US);
 
-    float distance = duration / 58.00;  // Formula: (340m/s * 1us) / 2
+    float distance = duration / DISTANCE_CONVERSION_VALUE;  // Formula: (340m/s * 1us) / 2
 
     return distance;
 }
@@ -149,7 +196,6 @@ float getDistanceCm(){
 void createPushInstruction(){
     // ボタン抽選
     targetButton = random(0, 3);
-    // Serial.println(instruction);
 
     switch(currentDifficulty){
         case EASY:
@@ -219,18 +265,15 @@ void createPushInorderInstruction(){
 
     switch(currentDifficulty){
         case EASY:
-
-            targetCount = 2;
+            targetCount = PUSH_ORDER_EASY_COUNT;
             break;
 
         case NORMAL:
-
-            targetCount = 3;
+            targetCount = PUSH_ORDER_NORMAL_COUNT;
             break;
 
         case HARD:
-
-            targetCount = 4;
+            targetCount = PUSH_ORDER_HARD_COUNT;
             break;
     }
 
@@ -241,17 +284,14 @@ void createPushInorderInstruction(){
 
         switch(targetOrder[i]){
             case BUTTON_LEFT:
-
                 strcat(instruction, "L");
                 break;
 
             case BUTTON_CENTER:
-
                 strcat(instruction, "C");
                 break;
 
             case BUTTON_RIGHT:
-
                 strcat(instruction, "R");
                 break;
         }
@@ -264,19 +304,19 @@ void createPushInorderInstruction(){
 
 // JOYSTICK_DOWNゲーム
 void createJoystickDownInstruction(){
-    targetAngle = random(0, 36) * 10;
+    targetAngle = random(0, TARGET_ANGLE_COUNT) * TARGET_ANGLE_STEP;
 
     switch(currentDifficulty){
         case EASY:
-            angleTolerance = 45;
+            angleTolerance = EASY_ANGLE_TOLERANCE;
             break;
 
         case NORMAL:
-            angleTolerance = 25;
+            angleTolerance = NORMAL_ANGLE_TOLERANCE;
             break;
 
         case HARD:
-            angleTolerance = 15;
+            angleTolerance = HARD_ANGLE_TOLERANCE;
             break;
     }
 
@@ -285,9 +325,9 @@ void createJoystickDownInstruction(){
 
 // Distanceゲーム
 void createDistanceInstruction(){
-    targetDistance = random(10, 40);
+    targetDistance = random(DISTANCE_TARGET_MIN_CM, DISTANCE_TARGET_MAX_CM);
 
-    distanceTolerance = DISTANCE_TOLERANCE;
+    distanceTolerance = DISTANCE_TOLERANCE_CM;
 
     accumulatedHoldTime = 0;
 
@@ -322,15 +362,15 @@ void createJoystickRotateInstruction(){
 
     switch(currentDifficulty){
         case EASY:
-            targetRotateCount = 3;
+            targetRotateCount = EASY_ROTATE_COUNT;
             break;
 
         case NORMAL:
-            targetRotateCount = 5;
+            targetRotateCount = NORMAL_ROTATE_COUNT;
             break;
 
         case HARD:
-            targetRotateCount = 5;
+            targetRotateCount = HARD_ROTATE_COUNT;
             break;
     }
 
@@ -424,9 +464,9 @@ void updateMiniGame(){
     }
 
     // 入力状態取得
-    bool leftPressed   = digitalRead(2) == LOW;
-    bool centerPressed = digitalRead(3) == LOW;
-    bool rightPressed  = digitalRead(4) == LOW;
+    bool leftPressed   = digitalRead(BUTTON_LEFT_PIN) == LOW;
+    bool centerPressed = digitalRead(BUTTON_CENTER_PIN) == LOW;
+    bool rightPressed  = digitalRead(BUTTON_RIGHT_PIN) == LOW;
     float currentAngle = getJoystickAngle();
 
     switch(currentGame){
@@ -571,12 +611,12 @@ void updateMiniGame(){
 
                 float delta = currentAngle - lastRotateAngle;
 
-                if(delta > 180){
-                    delta -= 360;
+                if(delta > HALF_CIRCLE_DEGREES){
+                    delta -= FULL_CIRCLE_DEGREES;
                 }
 
-                if(delta < -180){
-                    delta += 360;
+                if(delta < -HALF_CIRCLE_DEGREES){
+                    delta += FULL_CIRCLE_DEGREES;
                 }
 
                 lastRotateAngle = currentAngle;
@@ -588,8 +628,8 @@ void updateMiniGame(){
                     currentRotateProgress = accumulatedRotateAngle;
                 }
 
-                if(accumulatedRotateAngle >= 360.0){
-                    accumulatedRotateAngle -= 360.0;
+                if(accumulatedRotateAngle >= FULL_CIRCLE_DEGREES){
+                    accumulatedRotateAngle -= FULL_CIRCLE_DEGREES;
 
                     completedRotateCount++;
 
@@ -650,7 +690,7 @@ int getCompletedRotateCount(){
 }
 
 int getCurrentRotatePercent(){
-    return (int)(accumulatedRotateAngle * 100.0 / 360.0);
+    return (int)(accumulatedRotateAngle * ROTATE_PERCENT_MAX / FULL_CIRCLE_DEGREES);
 }
 
 

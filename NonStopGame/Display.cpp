@@ -5,13 +5,33 @@
 
 #include "Display.h"
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
+#define TEXTSIZE_SMALL 1
 #define TEXTSIZE_MIDDLE 2
 #define TEXTSIZE_BIG 3
 
+// I2Cアドレス
+#define OLED_I2C_ADDRESS  0x3C
+#define LCD_I2C_ADDRESS   0x27
+
+#define LCD_COLUMNS 16
+#define LCD_ROWS 2
+
+// I2Cデバイス応答確認
+// 指定されたI2Cアドレスにデバイスが応答するか確認する
+static bool isI2cDeviceConnected(uint8_t deviceAddress){
+    // 指定したアドレスへの通信を開始する
+    Wire.beginTransmission(deviceAddress);
+
+    // 通信を終了し、結果を取得する
+    byte result = Wire.endTransmission();
+
+    // 戻り値0の場合は正常応答
+    return result == 0;
+}
+
+LiquidCrystal_I2C lcd(LCD_I2C_ADDRESS, LCD_COLUMNS, LCD_ROWS);
 
 Adafruit_SSD1306 oled(
     SCREEN_WIDTH,
@@ -33,20 +53,62 @@ static int previousTotalGame = -1;
 static int previousRemainingBar = -1;
 
 // ディスプレイ初期化
-void initDisplay(){
-    if(!oled.begin( SSD1306_SWITCHCAPVCC, 0x3C)){
-        while(true);
+bool initDisplay(void){
+    // I2C通信を開始する
+    Wire.begin();
+
+    Serial.println("[DISPLAY] Initialization start");
+
+    // OLED接続確認
+    if(!isI2cDeviceConnected(OLED_I2C_ADDRESS)){
+        Serial.println("[ERROR] OLED is not responding");
+        Serial.println("[ERROR] Check OLED power, GND, SDA and SCL");
+        return false;
     }
 
-    // OLEDの表示条件を初期設定する
+    Serial.println("[DISPLAY] OLED detected");
+
+    // OLED初期化
+    if(!oled.begin(SSD1306_SWITCHCAPVCC, OLED_I2C_ADDRESS)){
+        Serial.println("[ERROR] OLED initialization failed");
+        return false;
+    }
+
+    // OLEDの初期表示条件を設定する
     oled.clearDisplay();
-    oled.setTextColor(WHITE);
-    oled.setTextSize(1);
+    oled.setTextColor(SSD1306_WHITE);
+    oled.setTextSize(TEXTSIZE_SMALL);
     oled.display();
 
-    // LCDを初期化する
+    Serial.println("[DISPLAY] OLED initialization succeeded");
+
+    // LCD接続確認
+    if(!isI2cDeviceConnected(LCD_I2C_ADDRESS)){
+        Serial.println("[ERROR] LCD is not responding");
+        Serial.println("[ERROR] Check LCD power, GND, SDA and SCL");
+        return false;
+    }
+
+    Serial.println("[DISPLAY] LCD detected");
+
+    // LCD初期化
     lcd.init();
     lcd.backlight();
+
+    // カーソル表示と点滅を無効にする
+    lcd.noCursor();
+    lcd.noBlink();
+
+    // LCDの初期表示を消去する
+    lcd.clear();
+
+    Serial.println(
+        "[DISPLAY] LCD initialization succeeded");
+
+    Serial.println(
+        "[DISPLAY] All displays initialized");
+
+    return true;
 }
 
 // ミニゲーム指示表示
@@ -95,7 +157,7 @@ void showJoystickInfo(int targetAngle, int currentAngle){
 
     oled.setTextColor(WHITE);
 
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0, 0);
     oled.print("TARGET");
@@ -119,7 +181,7 @@ void showDistanceInfo(int targetDistance, int currentDistance){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0, 0);
     oled.print("TARGET");
@@ -142,7 +204,7 @@ void showDistanceInfo(int targetDistance, int currentDistance){
 void showRotateInfo(int targetCount, int completedCount, int percent){
     oled.clearDisplay();
 
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0,0);
     oled.print("TARGET:");
@@ -163,7 +225,7 @@ void showRotateInfo(int targetCount, int completedCount, int percent){
 // メニュー表示
 void showMenuScreen(Difficulty difficulty){
     oled.clearDisplay();
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0,0);
     oled.println("NON STOP GAME");
@@ -193,7 +255,7 @@ void showMenuScreen(Difficulty difficulty){
 // カウントダウン表示
 void showCountdown(int count){
     oled.clearDisplay();
-    oled.setTextSize(3);
+    oled.setTextSize(TEXTSIZE_BIG);
     oled.setCursor(50,20);
     oled.print(count);
     oled.display();
@@ -202,7 +264,7 @@ void showCountdown(int count){
 // ゲームクリア表示
 void showGameClear(){
     oled.clearDisplay();
-    oled.setTextSize(2);
+    oled.setTextSize(TEXTSIZE_MIDDLE);
     oled.setCursor(0,20);
     oled.println("CLEAR!");
     oled.display();
@@ -287,7 +349,7 @@ void showMainMenu(int menuIndex){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     // タイトル
     oled.setCursor(14, 2);
@@ -325,12 +387,12 @@ void showDifficultyMenu(Difficulty difficulty){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0, 2);
     oled.println("SELECT DIFFICULTY");
 
-    oled.setTextSize(2);
+    oled.setTextSize(TEXTSIZE_MIDDLE);
     oled.setCursor(18, 25);
 
     switch(difficulty){
@@ -347,7 +409,7 @@ void showDifficultyMenu(Difficulty difficulty){
             break;
     }
 
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
     oled.setCursor(0, 55);
     oled.println("< > SELECT  OK NEXT");
 
@@ -361,16 +423,16 @@ void showGameCountMenu(int gameCount){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0, 2);
     oled.println("SELECT GAME COUNT");
 
-    oled.setTextSize(3);
+    oled.setTextSize(TEXTSIZE_BIG);
     oled.setCursor(52, 22);
     oled.println(gameCount);
 
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
     oled.setCursor(0, 55);
     oled.println("< > CHANGE  OK NEXT");
 
@@ -384,12 +446,12 @@ void showSpeedMenu(int speedIndex){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
 
     oled.setCursor(0, 2);
     oled.println("SELECT SPEED");
 
-    oled.setTextSize(2);
+    oled.setTextSize(TEXTSIZE_MIDDLE);
     oled.setCursor(10, 25);
 
     switch(speedIndex){
@@ -410,7 +472,7 @@ void showSpeedMenu(int speedIndex){
             break;
     }
 
-    oled.setTextSize(1);
+    oled.setTextSize(TEXTSIZE_SMALL);
     oled.setCursor(0, 55);
     oled.println("< > SELECT  OK SET");
 
