@@ -39,4 +39,16 @@ void showGameStatus(int currentGame, int totalGame, unsigned long elapsed, unsig
 // ゲームステータス表示のリセット
 void resetGameStatusDisplay();
 
+// メニュー画面を表示する
+void showMainMenu(int menuIndex);
+
+// 難易度選択画面を表示する
+void showDifficultyMenu(Difficulty difficulty);
+
+// ゲーム数選択画面を表示する
+void showGameCountMenu(int gameCount);
+
+// スピード選択画面を表示する
+void showSpeedMenu(int speedIndex);
+
 #endif

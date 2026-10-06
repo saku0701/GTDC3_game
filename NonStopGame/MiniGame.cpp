@@ -4,6 +4,9 @@
 static MiniGameType currentGame;
 static Difficulty currentDifficulty;
 
+// 現在のゲームスピード
+static GameSpeed currentSpeed;
+
 static bool successFlag;
 static bool failedFlag;
 
@@ -62,10 +65,10 @@ static float accumulatedRotateAngle;
 // ゲーム指示
 static char instruction[32];
 
-// 難易度ごとの制限時間
-#define EASY_TIME_LIMIT (10 * 1000)
-#define NORMAL_TIME_LIMIT (7 * 1000)
-#define HARD_TIME_LIMIT (3 * 1000)
+// スピードごとの制限時間
+#define SLOW_TIME_LIMIT    (10UL * 1000UL)
+#define NORMAL_TIME_LIMIT   (7UL * 1000UL)
+#define FAST_TIME_LIMIT     (3UL * 1000UL)
 
 // 残り時間表示
 unsigned long getElapsedTime(){
@@ -335,9 +338,15 @@ void createJoystickRotateInstruction(){
 }
 
 // ミニゲーム実行
-void startMiniGame(MiniGameType gameType, Difficulty difficulty){
+void startMiniGame(MiniGameType gameType, Difficulty difficulty, GameSpeed speed){
+    // 実行するミニゲームを保存する
     currentGame = gameType;
+
+    // ゲーム内容の難易度を保存する
     currentDifficulty = difficulty;
+
+    // ゲームの制限時間設定を保存する
+    currentSpeed = speed;
 
     // ゲームクリア判定フラグ
     successFlag = false;
@@ -348,19 +357,39 @@ void startMiniGame(MiniGameType gameType, Difficulty difficulty){
     // ゲーム開始時間取得
     startTime = millis();
 
-    switch(currentDifficulty){
-        case EASY:
-            timeLimit = EASY_TIME_LIMIT;
+    // スピード設定に応じて制限時間を決定する
+    switch(currentSpeed){
+        case SPEED_SLOW:
+            // SLOWは制限時間10秒
+            timeLimit = SLOW_TIME_LIMIT;
             break;
 
-        case NORMAL:
+        case SPEED_NORMAL:
+            // NORMALは制限時間7秒
             timeLimit = NORMAL_TIME_LIMIT;
             break;
 
-        case HARD:
-            timeLimit = HARD_TIME_LIMIT;
+        case SPEED_FAST:
+            // FASTは制限時間3秒
+            timeLimit = FAST_TIME_LIMIT;
+            break;
+
+        default:
+            // 不正な設定値の場合はNORMALを代替値とする
+            currentSpeed = SPEED_NORMAL;
+            timeLimit = NORMAL_TIME_LIMIT;
             break;
     }
+
+    // デバッグ用：開始時の設定値をシリアルモニタへ表示する
+    Serial.print("Difficulty=");
+    Serial.print((int)currentDifficulty);
+
+    Serial.print(" Speed=");
+    Serial.print((int)currentSpeed);
+
+    Serial.print(" TimeLimit=");
+    Serial.println((int)timeLimit);
 
 
     switch(currentGame){

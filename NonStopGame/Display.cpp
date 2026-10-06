@@ -3,9 +3,9 @@
 #include <Adafruit_SSD1306.h>
 #include <LiquidCrystal_I2C.h>
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-
 #include "Display.h"
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
 #define SCREEN_WIDTH 128
 #define SCREEN_HEIGHT 64
@@ -23,7 +23,6 @@ Adafruit_SSD1306 oled(
 // ========================================
 // LCDの前回表示値
 // ========================================
-
 // 前回表示した現在ゲーム番号
 static int previousCurrentGame = -1;
 
@@ -34,23 +33,24 @@ static int previousTotalGame = -1;
 static int previousRemainingBar = -1;
 
 // ディスプレイ初期化
-void initDisplay()
-{
+void initDisplay(){
     if(!oled.begin( SSD1306_SWITCHCAPVCC, 0x3C)){
         while(true);
     }
 
+    // OLEDの表示条件を初期設定する
     oled.clearDisplay();
+    oled.setTextColor(WHITE);
+    oled.setTextSize(1);
     oled.display();
 
+    // LCDを初期化する
     lcd.init();
     lcd.backlight();
 }
 
 // ミニゲーム指示表示
-void showInstruction(
-    const char* text)
-{
+void showInstruction(const char* text){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
@@ -66,8 +66,7 @@ void showInstruction(
 }
 
 // ミニゲーム成功画面
-void showSuccess()
-{
+void showSuccess(){
     oled.clearDisplay();
 
     oled.setTextSize(TEXTSIZE_BIG);
@@ -79,8 +78,7 @@ void showSuccess()
 }
 
 // ミニゲーム失敗画面
-void showFailed()
-{
+void showFailed(){
     oled.clearDisplay();
 
     oled.setTextSize(TEXTSIZE_BIG);
@@ -92,10 +90,7 @@ void showFailed()
 }
 
 // ジョイスティック位置表示
-void showJoystickInfo(
-    int targetAngle,
-    int currentAngle)
-{
+void showJoystickInfo(int targetAngle, int currentAngle){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
@@ -120,8 +115,7 @@ void showJoystickInfo(
 }
 
 // 測距表示
-void showDistanceInfo(int targetDistance, int currentDistance)
-{
+void showDistanceInfo(int targetDistance, int currentDistance){
     oled.clearDisplay();
 
     oled.setTextColor(WHITE);
@@ -284,4 +278,141 @@ void resetGameStatusDisplay(){
 
     // LCDの表示を一度だけ消去する
     lcd.clear();
+}
+
+// ========================================
+// メニュー画面
+// ========================================
+void showMainMenu(int menuIndex){
+    oled.clearDisplay();
+
+    oled.setTextColor(WHITE);
+    oled.setTextSize(1);
+
+    // タイトル
+    oled.setCursor(14, 2);
+    oled.println("NON STOP GAME");
+
+    // 「EDIT」表示
+    oled.setCursor(10, 25);
+
+    if(menuIndex == 0){
+        oled.print("> ");
+    }else{
+        oled.print("  ");
+    }
+
+    oled.println("EDIT");
+
+    // 「START」表示
+    oled.setCursor(10, 45);
+
+    if(menuIndex == 1){
+        oled.print("> ");
+    }else{
+        oled.print("  ");
+    }
+
+    oled.println("START");
+
+    oled.display();
+}
+
+// ========================================
+// 難易度選択画面
+// ========================================
+void showDifficultyMenu(Difficulty difficulty){
+    oled.clearDisplay();
+
+    oled.setTextColor(WHITE);
+    oled.setTextSize(1);
+
+    oled.setCursor(0, 2);
+    oled.println("SELECT DIFFICULTY");
+
+    oled.setTextSize(2);
+    oled.setCursor(18, 25);
+
+    switch(difficulty){
+        case EASY:
+            oled.println("EASY");
+            break;
+
+        case NORMAL:
+            oled.println("NORMAL");
+            break;
+
+        case HARD:
+            oled.println("HARD");
+            break;
+    }
+
+    oled.setTextSize(1);
+    oled.setCursor(0, 55);
+    oled.println("< > SELECT  OK NEXT");
+
+    oled.display();
+}
+
+// ========================================
+// ゲーム数選択画面
+// ========================================
+void showGameCountMenu(int gameCount){
+    oled.clearDisplay();
+
+    oled.setTextColor(WHITE);
+    oled.setTextSize(1);
+
+    oled.setCursor(0, 2);
+    oled.println("SELECT GAME COUNT");
+
+    oled.setTextSize(3);
+    oled.setCursor(52, 22);
+    oled.println(gameCount);
+
+    oled.setTextSize(1);
+    oled.setCursor(0, 55);
+    oled.println("< > CHANGE  OK NEXT");
+
+    oled.display();
+}
+
+// ========================================
+// スピード選択画面
+// ========================================
+void showSpeedMenu(int speedIndex){
+    oled.clearDisplay();
+
+    oled.setTextColor(WHITE);
+    oled.setTextSize(1);
+
+    oled.setCursor(0, 2);
+    oled.println("SELECT SPEED");
+
+    oled.setTextSize(2);
+    oled.setCursor(10, 25);
+
+    switch(speedIndex){
+        case SPEED_SLOW:
+            oled.println("SLOW");
+            break;
+
+        case SPEED_NORMAL:
+            oled.println("NORMAL");
+            break;
+
+        case SPEED_FAST:
+            oled.println("FAST");
+            break;
+
+        default:
+            oled.println("NORMAL");
+            break;
+    }
+
+    oled.setTextSize(1);
+    oled.setCursor(0, 55);
+    oled.println("< > SELECT  OK SET");
+
+    oled.display();
 }

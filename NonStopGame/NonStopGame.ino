@@ -15,18 +15,15 @@ void setup(){
     pinMode(9, OUTPUT);  // TRIG
     pinMode(8, INPUT);   // ECHO
 
-    // 乱数ソース
+    // 乱数初期化
     randomSeed(micros());
-
 
     initDisplay();
 
-    // startMiniGame( selectMiniGame(), NORMAL);//消す
     initGameManager();
 
-    showInstruction(getInstruction());
-
-    Serial.println(getInstruction());
+    // あとで消す
+    // Serial.println(getInstruction());
 
 }
 
@@ -34,48 +31,4 @@ void loop(){
     updateGameManager();
 
     delay(10);
-
-    //以降削除予定
-    // updateMiniGame();
-    
-    // // ジョイスティックゲームの時
-    // if(getCurrentGame() == GAME_JOYSTICK_DOWN){
-    //     showJoystickInfo(getTargetAngle(), getCurrentAngle());
-    // }
-
-    // // 測距ゲームの時
-    // if(getCurrentGame() == GAME_DISTANCE_KEEP){
-    //     showDistanceInfo(getTargetDistance(), getCurrentDistance());
-    // }
-
-    // // ジョイスティック回転ゲームの時
-    // if(getCurrentGame() == GAME_JOYSTICK_ROTATE){
-    //     showRotateInfo( getTargetRotateCount(), getCompletedRotateCount(), getCurrentRotatePercent());
-    // }
-
-
-    // //ミニゲーム成功
-    // if(isMiniGameSuccess()){
-    //     showSuccess();
-    //     Serial.println("SUCCESS");
-    // }
-
-    // //ミニゲーム失敗
-    // if(isMiniGameFailed()){
-    //     showFailed();
-    //     Serial.println("FAILED");
-    // }
-
-    // if(isTimeUp()){
-    //     if(isMiniGameSuccess()){
-    //         Serial.println("NEXT GAME");
-    //     }
-    //     else{
-    //         Serial.println("GAME OVER");
-    //     }
-
-    //     while(true);
-    // }
-
-    // delay(10);
 }

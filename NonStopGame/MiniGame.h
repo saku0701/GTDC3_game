@@ -2,11 +2,18 @@
 #define MINIGAME_H
 
 // ゲーム難易度
-enum Difficulty
-{
+enum Difficulty{
     EASY,
     NORMAL,
     HARD
+};
+
+// ゲームスピード
+// 制限時間を決定するために使用する
+enum GameSpeed{
+    SPEED_SLOW,    // 制限時間：10秒
+    SPEED_NORMAL,  // 制限時間：7秒
+    SPEED_FAST     // 制限時間：5秒
 };
 
 /* 制限時間(ms) */
@@ -26,7 +33,8 @@ enum MiniGameType{
 // ミニゲーム開始
 void startMiniGame(
     MiniGameType gameType,
-    Difficulty difficulty);
+    Difficulty difficulty,
+    GameSpeed speed);
 
 // ゲーム状態更新
 void updateMiniGame(void);
