@@ -15,7 +15,7 @@ void showSuccess();
 // ミニゲーム失敗画面
 void showFailed();
 
-// ジョイスティック表示
+// ジョイスティック傾倒ゲーム表示
 void showJoystickInfo(int targetAngle, int currentAngle);
 
 // 測距表示
@@ -33,10 +33,10 @@ void showCountdown(int count);
 // ゲームクリア表示
 void showGameClear();
 
-// ゲームステータス表示
+// ゲームステータス表示(LCD)
 void showGameStatus(int currentGame, int totalGame, unsigned long elapsed, unsigned long limit);
 
-// ゲームステータス表示のリセット
+// ゲームステータス表示のリセット(LCD)
 void resetGameStatusDisplay();
 
 // メニュー画面を表示する

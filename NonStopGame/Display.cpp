@@ -102,11 +102,9 @@ bool initDisplay(void){
     // LCDの初期表示を消去する
     lcd.clear();
 
-    Serial.println(
-        "[DISPLAY] LCD initialization succeeded");
+    Serial.println("[DISPLAY] LCD initialization succeeded");
 
-    Serial.println(
-        "[DISPLAY] All displays initialized");
+    Serial.println("[DISPLAY] All displays initialized");
 
     return true;
 }
@@ -117,7 +115,7 @@ void showInstruction(const char* text){
 
     oled.setTextColor(WHITE);
 
-    // 仮に2倍
+    // 2倍
     oled.setTextSize(TEXTSIZE_MIDDLE);
 
     oled.setCursor(10, 20);
