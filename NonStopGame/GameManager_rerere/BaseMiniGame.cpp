@@ -9,6 +9,48 @@ extern bool previousLeftPressed;
 extern bool previousCenterPressed;
 extern bool previousRightPressed;
 
+extern bool leftPressed;
+extern bool centerPressed;
+extern bool rightPressed;
+
+extern int joystickX;
+extern int joystickY;
+
+extern int currentIndex;
+extern Difficulty currentDifficulty;
+extern int targetCount;
+extern int targetOrder[];
+
+extern float accumulatedRotateAngle;
+
+extern ButtonType targetButton;
+
+// JOYSTICK_DOWNゲーム用
+extern int targetAngle;
+extern int angleTolerance;
+extern bool joystickJudged;
+
+// DISTANCEゲーム用
+extern int targetDistance;
+extern int distanceTolerance;
+extern unsigned long requiredHoldTime;
+extern unsigned long accumulatedHoldTime;
+extern unsigned long lastUpdateTime;
+// float currentDistanceCm;
+
+// JOYSTICK_ROTATEゲーム用
+extern int targetRotateCount;
+extern int completedRotateCount;
+extern float currentRotateProgress;
+extern bool rotateInit;
+extern int currentAngle;
+extern float lastRotateAngle;
+extern float accumulatedRotateAngle;
+
+
+// ゲーム指示
+extern char instruction[];
+
 // ミニゲーム抽選
 MiniGameType selectMiniGame(void){
   return (MiniGameType)random(0, GAME_TYPE_COUNT);
@@ -16,6 +58,8 @@ MiniGameType selectMiniGame(void){
 
 // ジョイスティック角度取得
 float getJoystickAngle(){
+    float dx = (float)joystickX - JOYSTICK_CENTER_X;
+    float dy = JOYSTICK_CENTER_Y - (float)joystickY;
     float angle = atan2(dy, dx) * HALF_CIRCLE_DEGREES / PI;
 
     if(angle < 0){
@@ -27,17 +71,18 @@ float getJoystickAngle(){
 
 // ジョイスティック傾き量判定
 bool isJoystickTilted(){
-    float dx = (float)x - JOYSTICK_CENTER_X;
-    float dy = (float)y - JOYSTICK_CENTER_Y;
+    float dx = (float)joystickX - JOYSTICK_CENTER_X;
+    float dy = (float)joystickY - JOYSTICK_CENTER_Y;
 
     float distance = sqrt(dx * dx + dy * dy);
 
     return distance > JOYSTICK_DEADZONE;
 }
 
-// ジョイスティック回転割合取得
-int getRotatePercent(){
-    float diff = fabs(actual - target);
+// 角度判定関数
+bool isAngleMatch(float actual, float target, float tolerance){
+    float diff =
+        fabs(actual - target);
 
     if(diff > HALF_CIRCLE_DEGREES){
         diff = FULL_CIRCLE_DEGREES - diff;
@@ -46,28 +91,33 @@ int getRotatePercent(){
     return (diff <= tolerance);
 }
 
+// ジョイスティック回転割合取得
+int getRotatePercent(){
+    return (int)(accumulatedRotateAngle * ROTATE_PERCENT_MAX / FULL_CIRCLE_DEGREES);
+}
+
 // 指定ボタン押下ゲーム
 // 初期化
 void initPushGame(){
     // ボタン抽選
-    targetButton = random(0, 3);
+    targetButton = (ButtonType)random(0, 3);
 
-    switch (targetButton);
-    {
-        case BUTTON_LEFT:
-            targetButton = "L";
-            break;
-        case BUTTON_CENTER:
-            targetButton = "C";
-            break;
-        case BUTTON_RIGHT:
-            targetButton = "R";
-            break;
+    // switch (targetButton)
+    // {
+    //     case BUTTON_LEFT:
+    //         targetButton = "L";
+    //         break;
+    //     case BUTTON_CENTER:
+    //         targetButton = "C";
+    //         break;
+    //     case BUTTON_RIGHT:
+    //         targetButton = "R";
+    //         break;
         
-        // default:
-        //     targetButton = "C";
-        //     break;
-    }
+    //     // default:
+    //     //     targetButton = "C";
+    //     //     break;
+    // }
 }
 // 状態更新
 void updatePushGame(){
@@ -144,21 +194,21 @@ void updatePushInOrderGame(){
     int pressedButton = -1;
 
     // 押された瞬間のみ検出
-    if(leftPressed && !prevLeftPressed){
+    if(leftPressed && !previousLeftPressed){
         pressedButton = BUTTON_LEFT;
     }
 
-    if(centerPressed && !prevCenterPressed){
+    if(centerPressed && !previousCenterPressed){
         pressedButton = BUTTON_CENTER;
     }
 
-    if(rightPressed && !prevRightPressed){
+    if(rightPressed && !previousRightPressed){
         pressedButton = BUTTON_RIGHT;
     }
 
-    prevLeftPressed = leftPressed;
-    prevCenterPressed = centerPressed;
-    prevRightPressed = rightPressed;
+    previousLeftPressed = leftPressed;
+    previousCenterPressed = centerPressed;
+    previousRightPressed = rightPressed;
 
     if(pressedButton == -1){
         return;
@@ -199,7 +249,7 @@ void initJoystickDownGame(){
             angleTolerance = HARD_ANGLE_TOLERANCE;
             break;
     }
-
+// デバッグ用
     sprintf(instruction, "%03d DEG", targetAngle);
 }
 // 状態更新
@@ -234,7 +284,7 @@ void updateJoystickDownGame(){
 // ジョイスティック回転ゲーム
 // 初期化
 void initJoystickRotateGame(){
-    rotateInit;
+    rotateInit = false;
     completedRotateCount = 0;
     accumulatedRotateAngle = 0.0;
     currentRotateProgress = 0.0;
@@ -257,6 +307,9 @@ void initJoystickRotateGame(){
 }
 // 状態更新
 void updateJoystickRotateGame();
+/*
+かいてない！！！！！！！！！！
+*/
 
 // 距離維持ゲーム
 // 初期化

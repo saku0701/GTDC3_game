@@ -29,7 +29,7 @@
 static bool isI2cDeviceConnected(uint8_t deviceAddress);
 
 // ディスプレイ初期化
-void initDisplay();
+bool initDisplay();
 
 // 画面表示
 void updateDisplay(
@@ -41,4 +41,4 @@ void updateDisplay(
     int gameCount, 
     int speedIndex, 
     int count, 
-    char* text);
+    char* instruction);

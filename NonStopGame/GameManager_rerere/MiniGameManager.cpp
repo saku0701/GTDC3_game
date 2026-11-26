@@ -17,10 +17,10 @@ extern Difficulty currentDifficulty;
 extern GameSpeed currentSpeed;
 
 // ミニゲームを開始した時刻をミリ秒単位で保持する
-extern unsigned long startTime = 0;
+extern unsigned long startTime;
 
 // ミニゲームの制限時間をミリ秒単位で保持する
-extern unsigned long timeLimit = 0;
+extern unsigned long timeLimit;
 
 extern MiniGameType currentGame;
 

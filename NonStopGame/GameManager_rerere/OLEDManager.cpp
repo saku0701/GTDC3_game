@@ -151,12 +151,12 @@ void showCountdown(int count){
 }
 
 // ミニゲーム指示表示
-void showInstruction(const char* text){
+void showInstruction(const char* instruction){
     oled.clearDisplay();
     oled.setTextColor(WHITE);
     oled.setTextSize(TEXTSIZE_MIDDLE);
     oled.setCursor(10, 20);
-    oled.println(text);
+    oled.println(instruction);
     oled.display();
 }
 
@@ -280,7 +280,7 @@ void showPushGame(ButtonType targetButton, Difficulty difficulty){
 }
 
 // ボタン指定順押下ゲーム画面表示
-void showPushInOrderGame(ButtonType targetButtonInOrder[], Difficulty difficulty){
+void showPushInOrderGame(ButtonType targetButtonInOrder[], Difficulty difficulty, char instruction[]){
     int targetCount = 3;
     oled.clearDisplay();
 
@@ -358,7 +358,7 @@ void showJoystickDownGame(int targetAngle, int currentAngle){
 }
 
 // ジョイスティック回転表示
-void showRotateInfo(int targetCount, int completedCount, int percent){
+void showJoystickRotateGame(int targetCount, int completedCount, int percent){
     oled.clearDisplay();
 
     // テキスト設定

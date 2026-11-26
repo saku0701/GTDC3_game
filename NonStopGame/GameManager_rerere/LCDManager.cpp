@@ -11,15 +11,15 @@
 // LCDの前回表示値
 // ========================================
 // 前回表示した現在ゲーム番号
-static int previousCurrentGame = -1;
+extern int previousCurrentGame;
 
 // 前回表示した全ゲーム数
-static int previousTotalGame = -1;
+extern int previousTotalGame;
 
 // 前回表示した残り時間バーの長さ
-static int previousRemainingBar = -1;
+extern int previousRemainingBar;
 
-LiquidCrystal_I2C lcd(LCD_I2C_ADDRESS, LCD_COLUMNS, LCD_ROWS);
+extern LiquidCrystal_I2C lcd;
 
 
 // 現在のゲーム数、目標ゲーム数、残り時間を表示

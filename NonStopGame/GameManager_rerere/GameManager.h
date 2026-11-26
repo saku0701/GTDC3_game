@@ -13,8 +13,6 @@
 
 #define DISTANCE_ERROR_VALUE 0.0f
 
-// ゲーム指示
-char instruction[32];
 
 // ゲーム全体の状態
 enum GameState {
@@ -23,7 +21,7 @@ enum GameState {
     GAME_INIT,
     STATE_COUNTDOWN,
     STATE_Instruction,
-    GAME_MINIGAME,
+    STATE_MINIGAME,
     STATE_SUCCESS,
     STATE_GAMECLEAR,
     STATE_GAMEOVER

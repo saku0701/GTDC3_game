@@ -1,9 +1,10 @@
+#include "GameManager.h"
 #include "MiniGameManager.h"
 #include "MenuManager.h"
 #include "DisplayManager.h"
 #include "InputManager.h"
 #include "BaseMiniGame.h"
-#include "GameManager.h"
+
 
 
 /*グローバル変数*/
@@ -45,6 +46,16 @@ bool previousLeftPressed = false;
 bool previousCenterPressed = false;
 bool previousRightPressed = false;
 
+// LCDの前回表示値
+// 前回表示した現在ゲーム番号
+int previousCurrentGame = -1;
+
+// 前回表示した全ゲーム数
+int previousTotalGame = -1;
+
+// 前回表示した残り時間バーの長さ
+int previousRemainingBar = -1;
+
 // 押下開始状態
 bool leftTriggered = false;
 bool centerTriggered = false;
@@ -68,7 +79,7 @@ bool prevCenterPressed = false;
 bool prevRightPressed = false;
 
 // PUSHゲームのボタン抽選用
-int targetButton;
+ButtonType targetButton;
 
 // PUSH＿INODERゲームのボタン順抽選
 int currentIndex;
@@ -93,12 +104,13 @@ int targetRotateCount;
 int completedRotateCount;
 float currentRotateProgress;
 bool rotateInit;
+int currentAngle;
 float lastRotateAngle;
 float accumulatedRotateAngle;
 
 
 // ゲーム指示
-extern char instruction[32];
+char instruction[32];
 
 
 
@@ -132,10 +144,10 @@ void loop(){
             break;
 
         case STATE_Instruction: // ゲーム指示表示
-            currentState = GAME_MINIGAME;
+            currentState = STATE_MINIGAME;
             break;
 
-        case GAME_MINIGAME:
+        case STATE_MINIGAME:
             updateMiniGame();
             if (currentGameCount > targetGameCount)
             {

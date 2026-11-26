@@ -13,9 +13,58 @@ extern bool previousLeftPressed;
 extern bool previousCenterPressed;
 extern bool previousRightPressed;
 
+extern bool leftTriggered;
+extern bool centerTriggered;
+extern bool rightTriggered;
+
+
 extern int joystickX;
 extern int joystickY;
 
+extern int currentDistanceCm;
+extern unsigned long lastDistanceUpdateTime;
+
+// 測距センサの値を取得して変換
+static float readDistanceSensor(void)
+{
+    // 安定したパルスを生成するため、一度LOWにする
+    digitalWrite(
+        DISTANCE_TRIGGER_PIN,
+        LOW);
+
+    delayMicroseconds(
+        TRIGGER_LOW_TIME_US);
+
+    // 10マイクロ秒のTRIG信号を送信する
+    digitalWrite(
+        DISTANCE_TRIGGER_PIN,
+        HIGH);
+
+    delayMicroseconds(
+        TRIGGER_HIGH_TIME_US);
+
+    digitalWrite(
+        DISTANCE_TRIGGER_PIN,
+        LOW);
+
+    // ECHO信号のHIGH期間を測定する
+    unsigned long duration =
+        pulseIn(
+            DISTANCE_ECHO_PIN,
+            HIGH,
+            ECHO_TIMEOUT_US);
+
+    // タイムアウトした場合は代替値を返す
+    if(duration == 0)
+    {
+        return DISTANCE_ERROR_VALUE;
+    }
+
+    // パルス時間を距離へ変換する
+    return
+        (float)duration /
+        DISTANCE_DIVISOR;
+}
 
 // 入力ピン初期化
 void initInputManager(){

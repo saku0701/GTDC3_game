@@ -12,7 +12,7 @@ OLEDディスプレイへの表示関数を持つ
 extern Adafruit_SSD1306 oled;
 
 // メニュー表示
-void showMenuScreen(Difficulty difficulty);
+void showMenuScreen(int menuIndex);
 
 // 難易度選択画面を表示する
 void showDifficultyMenu(Difficulty difficulty);
@@ -27,7 +27,7 @@ void showSpeedMenu(int speedIndex);
 void showCountdown(int count);
 
 // ミニゲーム指示表示
-void showInstruction(const char* text);
+void showInstruction(const char* instruction);
 
 // ミニゲーム成功画面表示
 void showSuccess();
@@ -48,7 +48,7 @@ void showPushInOrderGame(ButtonType targetButton[], Difficulty difficulty);
 void showJoystickDownGame(int targetAngle, int currentAngle);
 
 // ジョイスティック回転表示
-void showRotateInfo(int targetCount, int completedCount, int percent);
+void showJoystickRotateGame(int targetCount, int completedCount, int percent);
 
 // 距離維持ゲーム画面表示
 void showDistanceGame(int targetDistance, int currentDistance);

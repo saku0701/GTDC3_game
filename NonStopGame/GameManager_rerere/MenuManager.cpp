@@ -12,7 +12,7 @@ extern MenuState currentMenuState = MENU_MAIN;
 extern int menuIndex = MENU_ITEM_EDIT;
 
 // 選択中の難易度
-exterm Difficulty selectedDifficulty = NORMAL;
+extern Difficulty selectedDifficulty = NORMAL;
 
 // 選択中のゲーム数
 extern int selectedGameCount = GAME_COUNT_DEFAULT;
@@ -22,11 +22,15 @@ extern int selectedGameCount = GAME_COUNT_DEFAULT;
 extern GameSpeed selectedSpeed = SPEED_NORMAL;
 
 // GameManagerへ通知する開始要求
-extern bool startRequested = false;
+extern bool startRequested;
 
-extern previousLeftPressed;
-extern previousCenterPressed;
-extern previousRightPressed;
+extern bool previousLeftPressed;
+extern bool previousCenterPressed;
+extern bool previousRightPressed;
+
+extern bool leftTriggered;
+extern bool centerTriggered;
+extern bool rightTriggered;
 
 // メニュー画面の初期化
 void initMenu(void){

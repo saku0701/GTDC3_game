@@ -54,6 +54,7 @@
 #define DISTANCE_CONVERSION_VALUE 58.0f
 
 
+
 // ミニゲームが成功したかを、複数のソースファイルから参照できるように宣言する
 extern bool successFlag;
 
@@ -72,6 +73,9 @@ MiniGameType selectMiniGame();
 
 // ジョイスティック角度取得
 float getJoystickAngle();
+
+// 角度判定関数
+bool isAngleMatch(float actual, float target, float tolerance);
 
 // ジョイスティック傾き量判定
 bool isJoystickTilted();

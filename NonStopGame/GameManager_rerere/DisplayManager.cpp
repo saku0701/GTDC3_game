@@ -1,18 +1,28 @@
 #include "MiniGameManager.h"
 #include "DisplayManager.h"
+#include "LCDManager.h"
+#include "OLEDManager.h"
 
-// I2Cデバイス応答確認
-// 指定されたI2Cアドレスにデバイスが応答するか確認する
-// static bool isI2cDeviceConnected(uint8_t deviceAddress){
-//     // 指定したアドレスへの通信を開始する
-//     Wire.beginTransmission(deviceAddress);
+extern bool leftTriggered;
+extern bool centerTriggered;
+extern bool rightTriggered;
 
-//     // 通信を終了し、結果を取得する
-//     byte result = Wire.endTransmission();
+// ========================================
+// LCDの前回表示値
+// ========================================
+// 前回表示した現在ゲーム番号
+extern int previousCurrentGame;
 
-//     // 戻り値0の場合は正常応答
-//     return result == 0;
-// }
+// 前回表示した全ゲーム数
+extern int previousTotalGame;
+
+// 前回表示した残り時間バーの長さ
+extern int previousRemainingBar;
+
+
+// PUSHゲームのボタン抽選用
+// extern ButtonType targetButton;
+
 
 // I2Cデバイス応答確認
 // 指定されたI2Cアドレスにデバイスが応答するか確認する
@@ -97,13 +107,26 @@ bool initDisplay(){
 void updateDisplay(
     GameState currentState, 
     MenuState currentMenuState, 
-    static MiniGameType currentGame, 
+    MiniGameType currentGame, 
     int menuIndex, 
     Difficulty difficulty, 
     int gameCount, 
     int speedIndex, 
     int count, 
-    char* text)
+    char* instruction,
+    ButtonType targetButton, //追加
+    ButtonType targetButtonInOrder[], //追加
+    int targetDistance, //追加
+    int currentDistance, //追加
+    int targetAngle, //追加
+    int currentAngle,
+    int targetCount,
+    int completedCount,
+    int percent,
+    int totalGame,
+    unsigned long elapsed,
+    unsigned long limit
+    )
 {
     switch (currentState)
     {
@@ -135,7 +158,7 @@ void updateDisplay(
             break;
         
         case STATE_Instruction:
-            showInstruction(text);
+            showInstruction(instruction);
             break;
 
         case STATE_MINIGAME:
@@ -146,7 +169,7 @@ void updateDisplay(
                     break;
 
                 case GAME_PUSH_INORDER:
-                    showPushInOrderGame(*targetButton, difficulty);
+                    showPushInOrderGame(targetButtonInOrder, difficulty);
                     break;
 
                 case GAME_JOYSTICK_DOWN:
